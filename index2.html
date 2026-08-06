@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiv Kirana Store - Google Sheets Database</title>
+    <style>
+        :root {
+            --primary-color: #131921;
+            --secondary-color: #232f3e;
+            --accent-color: #febd69;
+            --btn-color: #ffd814;
+            --price-color: #B12704;
+            --bg-light: #eaeded;
+            --danger-color: #dc2626;
+            --success-color: #16a34a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background-color: var(--bg-light); color: #0f1111; }
+
+        header {
+            background-color: var(--primary-color); color: white; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { font-size: 22px; font-weight: bold; color: var(--accent-color); }
+        .search-bar { display: flex; flex: 1; max-width: 400px; margin: 0 15px; }
+        .search-bar input { width: 100%; padding: 8px; border: none; border-radius: 4px 0 0 4px; outline: none; }
+        .search-bar button { background-color: var(--accent-color); border: none; padding: 0 12px; border-radius: 0 4px 4px 0; cursor: pointer; }
+
+        .nav-btns { display: flex; gap: 10px; }
+        .cart-btn, .admin-btn { background: #374151; color: white; font-weight: bold; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; }
+        .admin-btn { background: var(--accent-color); color: black; }
+
+        .sub-nav { background-color: var(--secondary-color); color: white; padding: 8px 20px; display: flex; gap: 15px; overflow-x: auto; }
+        .sub-nav span { cursor: pointer; padding: 4px 8px; border-radius: 4px; white-space: nowrap; }
+
+        .main-container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .product-card { background: white; border-radius: 6px; padding: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
+        .product-img { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; }
+        .product-title { font-size: 14px; font-weight: bold; margin: 8px 0 4px 0; color: #007185; }
+        .product-price { font-size: 16px; font-weight: bold; color: var(--price-color); margin-bottom: 8px; }
+        .buy-btn { background-color: var(--btn-color); border: 1px solid #fcd200; padding: 6px 10px; width: 100%; border-radius: 20px; cursor: pointer; font-weight: bold; }
+
+        /* Admin */
+        #adminView { display: none; background: white; padding: 20px; border-radius: 8px; }
+        .config-box { background: #f3f4f6; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 12px; }
+        .form-grid input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; outline: none; width: 100%; }
+        .form-btn { background: var(--success-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #syncStatus { margin-bottom: 15px; padding: 10px; border-radius: 4px; font-weight: bold; display: none; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: var(--secondary-color); color: white; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; width: 90%; max-width: 500px; border-radius: 8px; padding: 20px; }
+        .close-btn { float: right; font-size: 20px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Shiv Kirana</div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterProducts()">
+            <button>🔍</button>
+        </div>
+        <div class="nav-btns">
+            <button class="cart-btn" onclick="openCartModal()">🛒 Cart (<span id="cartCount">0</span>)</button>
+            <button class="admin-btn" onclick="toggleAdminView()">⚙️ Admin</button>
+        </div>
+    </header>
+
+    <div class="sub-nav">
+        <span onclick="filterCategory('All')">All Products</span>
+        <span onclick="filterCategory('Namkeen')">Namkeen</span>
+        <span onclick="filterCategory('Snacks')">Snacks</span>
+        <span onclick="filterCategory('Potato Chips')">Potato Chips</span>
+        <span onclick="filterCategory('Candy')">Candy</span>
+        <span onclick="filterCategory('Soap')">Soap</span>
+    </div>
+
+    <div class="main-container">
+        <!-- Store View -->
+        <div id="storeView">
+            <h2 style="margin-bottom: 15px;">Google Sheets Live Products</h2>
+            <div class="product-grid" id="productGrid">Fetching live products from Google Sheet...</div>
+        </div>
+
+        <!-- Admin View -->
+        <div id="adminView">
+            <h2>Admin Dashboard (Google Sheets Backend)</h2>
+            <div id="syncStatus"></div>
+
+            <div class="config-box">
+                <h4>🔗 Google Apps Script Web App URL Setup</h4>
+                <input type="text" id="scriptUrlInput" placeholder="Paste Google Web App URL here" style="width:100%; padding:8px; margin:8px 0;">
+                <button class="form-btn" style="background:#4b5563;" onclick="saveScriptUrl()">Save Google Sheet URL</button>
+            </div>
+
+            <h3>Add / Edit Item</h3>
+            <form id="productForm" onsubmit="handleProductSubmit(event)" style="margin-top:10px;">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <input type="text" id="pName" placeholder="Product Name" required>
+                    <input type="text" id="pCategory" placeholder="Category" required>
+                    <input type="text" id="pWeight" placeholder="Weight/Pack" required>
+                    <input type="number" id="pPrice" placeholder="Price (₹)" required>
+                    <input type="url" id="pImg" placeholder="Image URL" required>
+                </div>
+                <button type="submit" class="form-btn" id="saveBtn">➕ Save to Google Sheet</button>
+            </form>
+
+            <h3 style="margin-top: 25px;">Live Sheet Table</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="adminTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal-overlay" id="cartModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCartModal()">&times;</span>
+            <h3 id="modalTitle">Shopping Cart</h3>
+            <div id="cartBody" style="margin-top:15px;">
+                <div id="cartItemsList"></div>
+                <h4 id="cartTotalDisplay" style="margin: 15px 0; text-align:right;">Total: ₹0</h4>
+                <button class="buy-btn" onclick="showCheckout()">Checkout (COD)</button>
+            </div>
+            <div id="checkoutBody" style="display: none; margin-top:15px;">
+                <input type="text" id="custName" placeholder="Full Name" style="width:100%; padding:8px; margin-bottom:8px;">
+                <input type="text" id="custPhone" placeholder="Mobile Number" style="width:100%; padding:8px; margin-bottom:8px;">
+                <textarea id="custAddress" placeholder="Full Delivery Address" style="width:100%; padding:8px; margin-bottom:8px;"></textarea>
+                <button class="buy-btn" onclick="submitOrder()">Place Order & Save to Sheet</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let products = [];
+        let cart = [];
+        let scriptUrl = localStorage.getItem("google_sheet_url") || "";
+
+        async function fetchProductsFromSheet() {
+            if (!scriptUrl) {
+                document.getElementById("productGrid").innerHTML = "<p style='color:red;'>Please setup Google Sheet Web App URL in Admin Panel!</p>";
+                return;
+            }
+            try {
+                const res = await fetch(scriptUrl);
+                products = await res.json();
+                displayProducts(products);
+                renderAdminTable();
+            } catch (err) {
+                console.error("Error fetching Google Sheet data:", err);
+            }
+        }
+
+        function displayProducts(items) {
+            const grid = document.getElementById("productGrid");
+            grid.innerHTML = "";
+            items.forEach(p => {
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <div>
+                            <img src="${p.img}" class="product-img">
+                            <div class="product-title">${p.name}</div>
+                            <div style="font-size:11px; color:#666;">${p.category} | ${p.weight}</div>
+                        </div>
+                        <div>
+                            <div class="product-price">₹${p.price}</div>
+                            <button class="buy-btn" onclick="addToCart(${p.id})">Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function updateSheetProducts() {
+            showStatus("⏳ Syncing with Google Sheet...", "#eff6ff", "#1e40af");
+            try {
+                const res = await fetch(`${scriptUrl}?action=updateProducts`, {
+                    method: 'POST',
+                    body: JSON.stringify(products)
+                });
+                if (res.ok) {
+                    showStatus("✅ Saved to Google Sheet Successfully!", "#f0fdf4", "#166534");
+                }
+            } catch(e) {
+                showStatus("❌ Failed to sync with Google Sheet!", "#fef2f2", "#991b1b");
+            }
+        }
+
+        function handleProductSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById("editId").value;
+            const name = document.getElementById("pName").value;
+            const category = document.getElementById("pCategory").value;
+            const weight = document.getElementById("pWeight").value;
+            const price = parseFloat(document.getElementById("pPrice").value);
+            const img = document.getElementById("pImg").value;
+
+            if (editId) {
+                const idx = products.findIndex(p => p.id == editId);
+                if (idx !== -1) products[idx] = { ...products[idx], name, category, weight, price, img };
+            } else {
+                const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                products.push({ id: newId, name, category, weight, price, img, addedAt: new Date().toLocaleString() });
+            }
+
+            displayProducts(products);
+            renderAdminTable();
+            document.getElementById("productForm").reset();
+            updateSheetProducts();
+        }
+
+        function deleteProduct(id) {
+            if (confirm("Delete product?")) {
+                products = products.filter(p => p.id !== id);
+                displayProducts(products);
+                renderAdminTable();
+                updateSheetProducts();
+            }
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById("adminTableBody");
+            tbody.innerHTML = "";
+            products.forEach(p => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td><img src="${p.img}" width="30" height="30"></td>
+                        <td><b>${p.name}</b></td>
+                        <td>${p.category}</td>
+                        <td>₹${p.price}</td>
+                        <td><button onclick="deleteProduct(${p.id})">Delete</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function addToCart(id) {
+            const p = products.find(item => item.id === id);
+            const exist = cart.find(item => item.id === id);
+            if (exist) exist.qty += 1;
+            else cart.push({ ...p, qty: 1 });
+            document.getElementById("cartCount").innerText = cart.reduce((s, i) => s + i.qty, 0);
+        }
+
+        function openCartModal() {
+            document.getElementById("cartModal").style.display = "flex";
+            document.getElementById("cartBody").style.display = "block";
+            document.getElementById("checkoutBody").style.display = "none";
+            const list = document.getElementById("cartItemsList");
+            list.innerHTML = "";
+            let total = 0;
+            cart.forEach(c => {
+                total += c.price * c.qty;
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${c.name} (x${c.qty})</span><b>₹${c.price * c.qty}</b></div>`;
+            });
+            document.getElementById("cartTotalDisplay").innerText = "Total: ₹" + total;
+        }
+
+        function closeCartModal() { document.getElementById("cartModal").style.display = "none"; }
+        function showCheckout() { document.getElementById("cartBody").style.display = "none"; document.getElementById("checkoutBody").style.display = "block"; }
+
+        async function submitOrder() {
+            const name = document.getElementById("custName").value;
+            const phone = document.getElementById("custPhone").value;
+            const address = document.getElementById("custAddress").value;
+            if (!name || !phone || !address) return alert("Fill details!");
+
+            const orderData = {
+                invoiceNo: "SK-" + Math.floor(100000 + Math.random() * 900000),
+                date: new Date().toLocaleString(),
+                name: name,
+                phone: phone,
+                address: address,
+                items: cart.map(i => `${i.name} (x${i.qty})`).join(", "),
+                total: cart.reduce((s, i) => s + (i.price * i.qty), 0)
+            };
+
+            await fetch(`${scriptUrl}?action=placeOrder`, {
+                method: 'POST',
+                body: JSON.stringify(orderData)
+            });
+
+            alert("Order Placed Successfully & Saved in Google Sheet!");
+            cart = [];
+            document.getElementById("cartCount").innerText = "0";
+            closeCartModal();
+        }
+
+        function saveScriptUrl() {
+            scriptUrl = document.getElementById("scriptUrlInput").value.trim();
+            localStorage.setItem("google_sheet_url", scriptUrl);
+            alert("Google Sheet URL Saved!");
+            fetchProductsFromSheet();
+        }
+
+        function showStatus(text, bg, fg) {
+            const el = document.getElementById("syncStatus");
+            el.style.display = "block"; el.style.background = bg; el.style.color = fg; el.innerText = text;
+        }
+
+        function toggleAdminView() {
+            const store = document.getElementById("storeView");
+            const admin = document.getElementById("adminView");
+            admin.style.display = admin.style.display === "none" ? "block" : "none";
+            store.style.display = admin.style.display === "block" ? "none" : "block";
+            document.getElementById("scriptUrlInput").value = scriptUrl;
+        }
+
+        function filterCategory(cat) {
+            if (cat === 'All') displayProducts(products);
+            else displayProducts(products.filter(p => p.category.toLowerCase() === cat.toLowerCase()));
+        }
+
+        function filterProducts() {
+            let q = document.getElementById("searchInput").value.toLowerCase();
+            displayProducts(products.filter(p => p.name.toLowerCase().includes(q)));
+        }
+
+        fetchProductsFromSheet();
+    </script>
+</body>
+</html>
