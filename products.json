@@ -1,0 +1,155 @@
+[
+  {
+    "id": 1,
+    "name": "Bajrang Super Traditional Royal Taste Namkeen",
+    "category": "Namkeen",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 2,
+    "name": "BN Bajrang Super Mixture",
+    "category": "Namkeen",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 3,
+    "name": "TastyTung Fun2ssh Karare Stick Tomato Punch",
+    "category": "Snacks",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 4,
+    "name": "TastyTung Magic Tomato Chips",
+    "category": "Potato Chips",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 5,
+    "name": "ABIS Gold Kemi Detergent Powder",
+    "category": "Detergent",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1585832770485-e6f046b40546?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 6,
+    "name": "Naughty Kaju Kishmish Rabdi Mithai",
+    "category": "Candy",
+    "weight": "Box",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 7,
+    "name": "Choco Valley Choco Love Paan Centerfilled Cube",
+    "category": "Chocolate",
+    "weight": "Box",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 8,
+    "name": "Alife Romantic Rose Soap",
+    "category": "Soap",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1607006344380-b6775a0824a7?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 9,
+    "name": "Alife Lovely Lily Soap",
+    "category": "Soap",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1607006344380-b6775a0824a7?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 10,
+    "name": "Alife Lively Lime Soap",
+    "category": "Soap",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1607006344380-b6775a0824a7?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 11,
+    "name": "Alife Sandalwood Soap",
+    "category": "Soap",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1607006344380-b6775a0824a7?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 12,
+    "name": "TastyTung Magic Masala Chips",
+    "category": "Potato Chips",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 13,
+    "name": "TastyTung Chupke Chupke Wafers",
+    "category": "Potato Wafers",
+    "weight": "N/A",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 14,
+    "name": "Amber Lychee Twist Candy",
+    "category": "Candy",
+    "weight": "Pack",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 15,
+    "name": "Amber Crunchy Coconut Candy",
+    "category": "Candy",
+    "weight": "Pack",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 16,
+    "name": "Amber Oro Orange Candy",
+    "category": "Candy",
+    "weight": "Pack",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  },
+  {
+    "id": 17,
+    "name": "Malkist Double Chocolatey Cracker Biscuits",
+    "category": "Biscuits",
+    "weight": "40 Packs",
+    "price": 5,
+    "img": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=300&q=80",
+    "addedAt": "06/08/2026, 08:30:00 PM"
+  }
+]
