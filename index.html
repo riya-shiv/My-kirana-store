@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiv Kirana Store - Live Instant Admin</title>
+    <style>
+        :root {
+            --primary-color: #131921;
+            --secondary-color: #232f3e;
+            --accent-color: #febd69;
+            --btn-color: #ffd814;
+            --btn-hover: #f7ca00;
+            --text-dark: #0f1111;
+            --price-color: #B12704;
+            --bg-light: #eaeded;
+            --danger-color: #dc2626;
+            --success-color: #16a34a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .logo-area { display: flex; flex-direction: column; }
+        .logo { font-size: 24px; font-weight: bold; color: var(--accent-color); letter-spacing: 1px; }
+        .tagline { font-size: 10px; color: #ccc; }
+
+        .search-bar { display: flex; flex: 1; max-width: 500px; margin: 0 20px; }
+        .search-bar input { width: 100%; padding: 10px 15px; border: none; border-radius: 4px 0 0 4px; font-size: 15px; outline: none; }
+        .search-bar button { background-color: var(--accent-color); border: none; padding: 0 18px; border-radius: 0 4px 4px 0; cursor: pointer; font-size: 16px; }
+
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .cart-icon, .admin-btn {
+            cursor: pointer; position: relative; font-size: 14px; background: #374151;
+            padding: 8px 12px; border-radius: 4px; color: white; font-weight: bold; border: none;
+            transition: background 0.2s;
+        }
+        .admin-btn { background: var(--accent-color); color: #000; }
+        .cart-count { background-color: var(--accent-color); color: #000; font-weight: bold; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
+
+        /* Navigation */
+        .sub-nav { background-color: var(--secondary-color); color: white; padding: 8px 20px; display: flex; gap: 20px; font-size: 14px; overflow-x: auto; }
+        .sub-nav span { cursor: pointer; white-space: nowrap; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
+        .sub-nav span:hover { background: rgba(255,255,255,0.1); color: var(--accent-color); }
+
+        /* Banner */
+        .hero-banner {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1400&q=80');
+            height: 220px; background-size: cover; background-position: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: white; text-align: center; padding: 0 20px;
+        }
+        .hero-banner h1 { font-size: 32px; margin-bottom: 8px; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); }
+
+        /* Container & Grid */
+        .main-container { max-width: 1300px; margin: 20px auto; padding: 0 15px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
+        
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .product-card { background: white; border-radius: 6px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+        .product-card:hover { transform: translateY(-4px); }
+        .product-img { width: 100%; height: 160px; object-fit: cover; border-radius: 4px; }
+        .product-title { font-size: 15px; font-weight: 600; margin: 10px 0 5px 0; color: #007185; }
+        .product-weight { font-size: 12px; color: #565959; margin-bottom: 4px; }
+        .product-price { font-size: 18px; font-weight: bold; color: var(--price-color); margin-bottom: 10px; }
+        .buy-btn { background-color: var(--btn-color); border: 1px solid #fcd200; padding: 8px 12px; width: 100%; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 14px; }
+
+        /* Toast */
+        #toast { visibility: hidden; min-width: 250px; background-color: #232f3e; color: #fff; text-align: center; border-radius: 4px; padding: 12px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); }
+        #toast.show { visibility: visible; }
+
+        /* Admin Section */
+        #adminView { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .config-box { background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 12px; }
+        .form-grid input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; outline: none; width: 100%; }
+        .form-btn { background: var(--success-color); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #syncStatus { margin-bottom: 15px; padding: 10px; border-radius: 4px; font-weight: bold; display: none; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: var(--secondary-color); color: white; }
+        .btn-edit { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; }
+        .btn-delete { background: var(--danger-color); color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; }
+
+        /* Modal Overlay */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; width: 90%; max-width: 550px; border-radius: 8px; padding: 20px; max-height: 90vh; overflow-y: auto; }
+        .close-btn { float: right; font-size: 22px; cursor: pointer; font-weight: bold; }
+        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .action-btn { background-color: var(--btn-color); width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* Form Group */
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+
+        footer { background-color: var(--secondary-color); color: white; text-align: center; padding: 20px; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <div class="logo">Shiv Kirana</div>
+            <span class="tagline">Supermarket & Grocery</span>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search item..." onkeyup="filterProducts()">
+            <button>🔍</button>
+        </div>
+        <div class="header-actions">
+            <button class="cart-icon" id="cartIcon" onclick="openCartModal()">🛒 Cart <span class="cart-count" id="cartCount">0</span></button>
+            <button class="admin-btn" onclick="toggleAdminView()">⚙️ Admin Panel</button>
+        </div>
+    </header>
+
+    <div class="sub-nav">
+        <span onclick="filterCategory('All')">All Products</span>
+        <span onclick="filterCategory('Namkeen')">Namkeen</span>
+        <span onclick="filterCategory('Snacks')">Snacks</span>
+        <span onclick="filterCategory('Potato Chips')">Potato Chips</span>
+        <span onclick="filterCategory('Candy')">Candy</span>
+        <span onclick="filterCategory('Soap')">Soap</span>
+        <span onclick="filterCategory('Chocolate')">Chocolate</span>
+    </div>
+
+    <div class="hero-banner">
+        <h1>Fresh Groceries Delivered to Your Doorstep!</h1>
+        <p>100% Guaranteed Purity • Cash on Delivery Available</p>
+    </div>
+
+    <div class="main-container">
+
+        <!-- STORE VIEW -->
+        <div id="storeView">
+            <div class="section-header">
+                <h2 id="categoryTitle">All Groceries</h2>
+                <button onclick="fetchLiveProductsInstant()" style="padding:6px 12px; cursor:pointer; background:#fff; border:1px solid #ccc; border-radius:4px;">🔄 Refresh Live Data</button>
+            </div>
+            <div class="product-grid" id="productGrid">Loading products live from GitHub...</div>
+        </div>
+
+        <!-- ADMIN DASHBOARD -->
+        <div id="adminView">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2>Admin Dashboard (Direct Repo API + Cache Busting)</h2>
+                <button class="form-btn" style="background:#4b5563;" onclick="toggleAdminView()">Back to Store</button>
+            </div>
+            
+            <div id="syncStatus"></div>
+
+            <!-- GitHub Setup -->
+            <div class="config-box">
+                <h4>🔑 GitHub Credentials Setup (One Time)</h4>
+                <div class="form-grid" style="margin-top:8px;">
+                    <input type="text" id="ghOwner" placeholder="GitHub Username">
+                    <input type="text" id="ghRepo" placeholder="Repo Name">
+                    <input type="text" id="ghBranch" placeholder="Branch" value="main">
+                    <input type="password" id="ghToken" placeholder="Personal Access Token (PAT)">
+                </div>
+                <button class="form-btn" style="background:#374151;" onclick="saveGHConfig()">Save Configuration</button>
+            </div>
+
+            <!-- Form -->
+            <h3>Add / Edit Item</h3>
+            <form id="productForm" onsubmit="handleProductSubmit(event)" style="margin-top:10px;">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <input type="text" id="pName" placeholder="Product Name" required>
+                    <input type="text" id="pCategory" placeholder="Category" required>
+                    <input type="text" id="pWeight" placeholder="Weight/Pack" required>
+                    <input type="number" id="pPrice" placeholder="Price (₹)" required>
+                    <input type="url" id="pImg" placeholder="Image URL" required>
+                </div>
+                <button type="submit" class="form-btn" id="saveBtn">➕ Save & Commit to GitHub</button>
+                <button type="button" class="form-btn" style="background:#6b7280; display:none;" id="cancelBtn" onclick="resetForm()">Cancel</button>
+            </form>
+
+            <h3 style="margin-top: 25px;">Repository Live Products</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Image</th><th>Name</th><th>Category</th><th>Weight</th><th>Price</th><th>Added At</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">Item added to cart!</div>
+
+    <!-- Cart & Order Modal -->
+    <div class="modal-overlay" id="cartModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCartModal()">&times;</span>
+            <h3 id="modalTitle">Shopping Cart</h3>
+            
+            <!-- Cart Body -->
+            <div id="cartBody" style="margin-top:15px;">
+                <div id="cartItemsList"></div>
+                <h4 id="cartTotalDisplay" style="margin: 15px 0; text-align:right;">Total: ₹0</h4>
+                <button class="action-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
+            </div>
+
+            <!-- Checkout Form -->
+            <div id="checkoutBody" style="display: none; margin-top:15px;">
+                <div style="background:#e7f4e4; color:#137333; padding:8px; border-radius:4px; font-weight:bold; text-align:center; margin-bottom:10px;">💵 Payment Mode: Cash on Delivery (COD)</div>
+                <div class="form-group"><label>Full Name</label><input type="text" id="custName"></div>
+                <div class="form-group"><label>Mobile Number</label><input type="text" id="custPhone"></div>
+                <div class="form-group"><label>Delivery Address</label><textarea id="custAddress" rows="3"></textarea></div>
+                <button class="action-btn" onclick="submitOrderToGoogleSheets()">Place Order</button>
+            </div>
+
+            <!-- Invoice View -->
+            <div id="invoiceBody" style="display: none; margin-top:15px;">
+                <div id="invoiceSection" style="font-size:13px;">
+                    <h2 style="text-align:center;">Shiv Kirana Store</h2>
+                    <div id="invoiceCustomerDetails" style="margin: 10px 0;"></div>
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:10px;">
+                        <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+                        <tbody id="invoiceTableBody"></tbody>
+                    </table>
+                    <h3 id="invoiceTotalDisplay" style="text-align:right;">Total: ₹0</h3>
+                </div>
+                <button class="action-btn" onclick="downloadPDF()" style="background:#232f3e; color:white;">📥 Print / Download Invoice</button>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Shiv Kirana Store. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let products = [];
+        let cart = [];
+        let ghConfig = JSON.parse(localStorage.getItem("gh_config")) || { owner: "", repo: "", branch: "main", token: "" };
+
+        // 1. RAW GITHUB CACHE BUSTING INSTANT FETCH
+        async function fetchLiveProductsInstant() {
+            if (!ghConfig.owner || !ghConfig.repo) {
+                // Default Fallback
+                try {
+                    const localRes = await fetch("products.json");
+                    if (localRes.ok) {
+                        products = await localRes.json();
+                        displayProducts(products);
+                        return;
+                    }
+                } catch(e) {}
+                document.getElementById("productGrid").innerHTML = "<p style='color:red;'>Admin setup incomplete! Please fill GitHub details in Admin Panel.</p>";
+                return;
+            }
+
+            // ?t=Date.now() parameter forces GitHub CDN to return fresh real-time JSON
+            const rawUrl = `https://raw.githubusercontent.com/${ghConfig.owner}/${ghConfig.repo}/${ghConfig.branch}/products.json?t=${Date.now()}`;
+            
+            try {
+                const res = await fetch(rawUrl, { cache: "no-store" });
+                if (res.ok) {
+                    products = await res.json();
+                    displayProducts(products);
+                    renderAdminTable();
+                } else {
+                    document.getElementById("productGrid").innerHTML = "<p>Make sure products.json exists in your repository!</p>";
+                }
+            } catch (err) {
+                console.error("Fetch Error:", err);
+            }
+        }
+
+        function displayProducts(items) {
+            const grid = document.getElementById("productGrid");
+            grid.innerHTML = "";
+            if (items.length === 0) {
+                grid.innerHTML = "<p>No products found!</p>";
+                return;
+            }
+            items.forEach(p => {
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <div>
+                            <img src="${p.img}" class="product-img">
+                            <div class="product-title">${p.name}</div>
+                            <div class="product-weight">Category: ${p.category} | ${p.weight}</div>
+                            <div class="product-weight" style="font-size:10px; color:#888;">Added: ${p.addedAt || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <div class="product-price">₹${p.price}</div>
+                            <button class="buy-btn" onclick="addToCart(${p.id})">Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 2. DIRECT GITHUB API COMMIT PUSH
+        async function syncToGitHubAPI() {
+            showStatus("⏳ Saving changes directly to GitHub Repository...", "#eff6ff", "#1e40af");
+
+            const apiUrl = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/products.json`;
+
+            try {
+                // Get SHA
+                const getRes = await fetch(apiUrl, {
+                    headers: { 'Authorization': `token ${ghConfig.token}` }
+                });
+
+                if (!getRes.ok) {
+                    showStatus("❌ Failed to connect to Repo. Check PAT Token & Details!", "#fef2f2", "#991b1b");
+                    return;
+                }
+
+                const fileData = await getRes.json();
+                const currentSha = fileData.sha;
+
+                // UTF-8 Base64 Encoding
+                const jsonString = JSON.stringify(products, null, 2);
+                const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
+
+                // PUT Request
+                const putRes = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${ghConfig.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Admin Update: products.json [${new Date().toLocaleString()}]`,
+                        content: base64Content,
+                        sha: currentSha,
+                        branch: ghConfig.branch
+                    })
+                });
+
+                if (putRes.ok) {
+                    showStatus("✅ Saved & Committed to GitHub Database Live!", "#f0fdf4", "#166534");
+                    setTimeout(fetchLiveProductsInstant, 1000);
+                } else {
+                    const err = await putRes.json();
+                    showStatus("❌ GitHub Error: " + err.message, "#fef2f2", "#991b1b");
+                }
+            } catch (err) {
+                showStatus("❌ Network Error during API Push!", "#fef2f2", "#991b1b");
+            }
+        }
+
+        function handleProductSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById("editId").value;
+            const name = document.getElementById("pName").value;
+            const category = document.getElementById("pCategory").value;
+            const weight = document.getElementById("pWeight").value;
+            const price = parseFloat(document.getElementById("pPrice").value);
+            const img = document.getElementById("pImg").value;
+            const now = new Date().toLocaleString();
+
+            if (editId) {
+                const idx = products.findIndex(p => p.id == editId);
+                if (idx !== -1) {
+                    products[idx] = { ...products[idx], name, category, weight, price, img };
+                }
+            } else {
+                const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                products.push({ id: newId, name, category, weight, price, img, addedAt: now });
+            }
+
+            displayProducts(products);
+            renderAdminTable();
+            resetForm();
+            syncToGitHubAPI();
+        }
+
+        function deleteProduct(id) {
+            if (confirm("Delete this product permanently from GitHub database?")) {
+                products = products.filter(p => p.id !== id);
+                displayProducts(products);
+                renderAdminTable();
+                syncToGitHubAPI();
+            }
+        }
+
+        function editProduct(id) {
+            const p = products.find(prod => prod.id === id);
+            if (p) {
+                document.getElementById("editId").value = p.id;
+                document.getElementById("pName").value = p.name;
+                document.getElementById("pCategory").value = p.category;
+                document.getElementById("pWeight").value = p.weight;
+                document.getElementById("pPrice").value = p.price;
+                document.getElementById("pImg").value = p.img;
+                document.getElementById("saveBtn").innerText = "🔄 Update & Push";
+                document.getElementById("cancelBtn").style.display = "inline-block";
+            }
+        }
+
+        function resetForm() {
+            document.getElementById("productForm").reset();
+            document.getElementById("editId").value = "";
+            document.getElementById("saveBtn").innerText = "➕ Save & Commit to GitHub";
+            document.getElementById("cancelBtn").style.display = "none";
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById("adminTableBody");
+            tbody.innerHTML = "";
+            products.forEach(p => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td><img src="${p.img}" width="35" height="35" style="object-fit:cover;"></td>
+                        <td><b>${p.name}</b></td>
+                        <td>${p.category}</td>
+                        <td>${p.weight}</td>
+                        <td>₹${p.price}</td>
+                        <td><small>${p.addedAt || 'N/A'}</small></td>
+                        <td>
+                            <button class="btn-edit" onclick="editProduct(${p.id})">Edit</button>
+                            <button class="btn-delete" onclick="deleteProduct(${p.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function saveGHConfig() {
+            ghConfig.owner = document.getElementById("ghOwner").value.trim();
+            ghConfig.repo = document.getElementById("ghRepo").value.trim();
+            ghConfig.branch = document.getElementById("ghBranch").value.trim() || "main";
+            ghConfig.token = document.getElementById("ghToken").value.trim();
+
+            localStorage.setItem("gh_config", JSON.stringify(ghConfig));
+            alert("GitHub Details Saved!");
+            fetchLiveProductsInstant();
+        }
+
+        function showStatus(text, bg, fg) {
+            const el = document.getElementById("syncStatus");
+            el.style.display = "block"; el.style.background = bg; el.style.color = fg;
+            el.innerText = text;
+        }
+
+        function toggleAdminView() {
+            const store = document.getElementById("storeView");
+            const admin = document.getElementById("adminView");
+            if (admin.style.display === "none" || admin.style.display === "") {
+                admin.style.display = "block"; store.style.display = "none";
+                document.getElementById("ghOwner").value = ghConfig.owner;
+                document.getElementById("ghRepo").value = ghConfig.repo;
+                document.getElementById("ghBranch").value = ghConfig.branch;
+                document.getElementById("ghToken").value = ghConfig.token;
+                renderAdminTable();
+            } else {
+                admin.style.display = "none"; store.style.display = "block";
+            }
+        }
+
+        // SHOPPING CART & ORDERS
+        function addToCart(id) {
+            const p = products.find(item => item.id === id);
+            const exist = cart.find(item => item.id === id);
+            if (exist) exist.qty += 1;
+            else cart.push({ ...p, qty: 1 });
+            
+            document.getElementById("cartCount").innerText = cart.reduce((sum, item) => sum + item.qty, 0);
+            
+            const toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(() => { toast.className = ""; }, 2500);
+        }
+
+        function openCartModal() {
+            document.getElementById("cartModal").style.display = "flex";
+            document.getElementById("cartBody").style.display = "block";
+            document.getElementById("checkoutBody").style.display = "none";
+            document.getElementById("invoiceBody").style.display = "none";
+            renderCart();
+        }
+
+        function closeCartModal() {
+            document.getElementById("cartModal").style.display = "none";
+        }
+
+        function renderCart() {
+            const list = document.getElementById("cartItemsList");
+            list.innerHTML = "";
+            let total = 0;
+            cart.forEach(c => {
+                let sub = c.price * c.qty;
+                total += sub;
+                list.innerHTML += `<div class="cart-item"><span><b>${c.name}</b> (x${c.qty})</span> <b>₹${sub}</b></div>`;
+            });
+            document.getElementById("cartTotalDisplay").innerText = "Total: ₹" + total;
+        }
+
+        function proceedToCheckout() {
+            if (cart.length === 0) return alert("Cart is empty!");
+            document.getElementById("cartBody").style.display = "none";
+            document.getElementById("checkoutBody").style.display = "block";
+        }
+
+        function submitOrderToGoogleSheets() {
+            const name = document.getElementById("custName").value;
+            const phone = document.getElementById("custPhone").value;
+            const address = document.getElementById("custAddress").value;
+            if (!name || !phone || !address) return alert("Fill all customer details!");
+
+            const invoiceNo = "SK-" + Math.floor(100000 + Math.random() * 900000);
+            const currentDate = new Date().toLocaleDateString();
+            let grandTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            document.getElementById("invoiceCustomerDetails").innerHTML = `
+                <p><b>Invoice No:</b> ${invoiceNo}</p>
+                <p><b>Date:</b> ${currentDate}</p>
+                <p><b>Name:</b> ${name} | <b>Mobile:</b> ${phone}</p>
+                <p><b>Address:</b> ${address}</p>
+            `;
+
+            let tbody = "";
+            cart.forEach((c) => {
+                tbody += `<tr><td>${c.name}</td><td>${c.qty}</td><td>₹${c.price}</td><td>₹${c.price * c.qty}</td></tr>`;
+            });
+            document.getElementById("invoiceTableBody").innerHTML = tbody;
+            document.getElementById("invoiceTotalDisplay").innerText = "Total Payable: ₹" + grandTotal + " (COD)";
+
+            document.getElementById("checkoutBody").style.display = "none";
+            document.getElementById("invoiceBody").style.display = "block";
+        }
+
+        function downloadPDF() {
+            window.print();
+        }
+
+        function filterCategory(cat) {
+            if (cat === 'All') displayProducts(products);
+            else displayProducts(products.filter(p => p.category.toLowerCase() === cat.toLowerCase()));
+        }
+
+        function filterProducts() {
+            let q = document.getElementById("searchInput").value.toLowerCase();
+            displayProducts(products.filter(p => p.name.toLowerCase().includes(q)));
+        }
+
+        // Init
+        fetchLiveProductsInstant();
+    </script>
+</body>
+</html>
