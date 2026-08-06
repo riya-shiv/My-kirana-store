@@ -251,12 +251,12 @@
         let cart = [];
         let ghConfig = JSON.parse(localStorage.getItem("gh_config")) || { owner: "", repo: "", branch: "main", token: "" };
 
-        // 1. RAW GITHUB CACHE BUSTING INSTANT FETCH
+        // 1. RAW GITHUB STRICT CACHE BUSTING & REAL-TIME INSTANT FETCH
         async function fetchLiveProductsInstant() {
             if (!ghConfig.owner || !ghConfig.repo) {
-                // Default Fallback
+                // Local Fallback
                 try {
-                    const localRes = await fetch("products.json");
+                    const localRes = await fetch("products.json?v=" + Date.now(), { cache: "no-store" });
                     if (localRes.ok) {
                         products = await localRes.json();
                         displayProducts(products);
@@ -267,11 +267,19 @@
                 return;
             }
 
-            // ?t=Date.now() parameter forces GitHub CDN to return fresh real-time JSON
+            // Dynamically Bypassing Cache via Timestamp Query Param
             const rawUrl = `https://raw.githubusercontent.com/${ghConfig.owner}/${ghConfig.repo}/${ghConfig.branch}/products.json?t=${Date.now()}`;
             
             try {
-                const res = await fetch(rawUrl, { cache: "no-store" });
+                const res = await fetch(rawUrl, { 
+                    cache: "no-store",
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
                 if (res.ok) {
                     products = await res.json();
                     displayProducts(products);
@@ -316,7 +324,7 @@
             const apiUrl = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/products.json`;
 
             try {
-                // Get SHA
+                // Get Current File SHA
                 const getRes = await fetch(apiUrl, {
                     headers: { 'Authorization': `token ${ghConfig.token}` }
                 });
@@ -350,7 +358,7 @@
 
                 if (putRes.ok) {
                     showStatus("✅ Saved & Committed to GitHub Database Live!", "#f0fdf4", "#166534");
-                    setTimeout(fetchLiveProductsInstant, 1000);
+                    setTimeout(fetchLiveProductsInstant, 1200);
                 } else {
                     const err = await putRes.json();
                     showStatus("❌ GitHub Error: " + err.message, "#fef2f2", "#991b1b");
@@ -418,6 +426,7 @@
 
         function renderAdminTable() {
             const tbody = document.getElementById("adminTableBody");
+            if (!tbody) return;
             tbody.innerHTML = "";
             products.forEach(p => {
                 tbody.innerHTML += `
@@ -556,8 +565,16 @@
             displayProducts(products.filter(p => p.name.toLowerCase().includes(q)));
         }
 
-        // Init
+        // Initial Load
         fetchLiveProductsInstant();
+
+        // Background Auto-Refresh (Every 10 Seconds) For Live Mobile Updates
+        setInterval(() => {
+            const admin = document.getElementById("adminView");
+            if (!admin || admin.style.display === "none" || admin.style.display === "") {
+                fetchLiveProductsInstant();
+            }
+        }, 10000);
     </script>
 </body>
 </html>
